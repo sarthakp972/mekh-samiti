@@ -1,0 +1,15 @@
+@keyframes colorChange {
+    0% { color: white; }
+    25% { color: black; }
+    50% { color: rgb(23, 239, 232); }
+    75% { color: greenyellow; }
+    100% { color: blue; }
+  }
+  
+  .donation-text {
+    font-weight: bold;
+    font-size: 20px;
+    animation: colorChange 4s infinite;
+    /* transition: all 0.3s ease-in-out; */
+  }
+  
