@@ -1,10 +1,30 @@
-// import React from "react";
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Button, Image } from "react-bootstrap";
-import { FaPhone, FaUsers, FaDonate } from "react-icons/fa";
-// import { useNavigate } from "react-router-dom";
+import {  FaUsers, FaDonate } from "react-icons/fa";
+import { database, ref, get } from "../firebaseConfig"; // Import Firebase database
 
 function About() {
-//   const navigate = useNavigate(); // For navigation to donation page
+  const [members, setMembers] = useState([]);
+
+  // Fetch members' names from Firebase
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const snapshot = await get(ref(database, "samiti_sadashya"));
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const membersArray = Object.values(data).map((member) => member.name); // Extract only names
+          setMembers(membersArray);
+        } else {
+          setMembers([]);
+        }
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      }
+    };
+
+    fetchMembers();
+  }, []);
 
   return (
     <div style={{ background: "#fff3f3", minHeight: "100vh", padding: "40px 0" }}>
@@ -32,38 +52,20 @@ function About() {
         </Card>
 
         {/* Committee Members */}
-        <h4 className="text-center fw-bold mb-3" style={{ color: "#8B0000" }}>🛕 समिति के सदस्य</h4>
+        <h4 className="text-center fw-bold mb-3" style={{ color: "#8B0000" }}>🛕 समिति के मुख्य सदस्य</h4>
         <Row className="g-4">
-          {/* Member 1 */}
-          <Col md={4}>
-            <Card className="shadow text-center p-3 border-0">
-              <FaUsers size={50} color="#8B0000" />
-              <h5 className="mt-2 fw-bold">रमेश शर्मा (अध्यक्ष)</h5>
-              <p className="fs-5">
-                <FaPhone color="green" /> <b>+91 98765 43210</b>
-              </p>
-            </Card>
-          </Col>
-          {/* Member 2 */}
-          <Col md={4}>
-            <Card className="shadow text-center p-3 border-0">
-              <FaUsers size={50} color="#8B0000" />
-              <h5 className="mt-2 fw-bold">सुरेश तिवारी (सचिव)</h5>
-              <p className="fs-5">
-                <FaPhone color="green" /> <b>+91 91234 56789</b>
-              </p>
-            </Card>
-          </Col>
-          {/* Member 3 */}
-          <Col md={4}>
-            <Card className="shadow text-center p-3 border-0">
-              <FaUsers size={50} color="#8B0000" />
-              <h5 className="mt-2 fw-bold">महेश वर्मा (कोषाध्यक्ष)</h5>
-              <p className="fs-5">
-                <FaPhone color="green" /> <b>+91 99876 54321</b>
-              </p>
-            </Card>
-          </Col>
+          {members.length > 0 ? (
+            members.map((name, index) => (
+              <Col md={4} key={index}>
+                <Card className="shadow text-center p-3 border-0">
+                  <FaUsers size={50} color="#8B0000" />
+                  <h5 className="mt-2 fw-bold">{name}</h5>
+                </Card>
+              </Col>
+            ))
+          ) : (
+            <p className="text-center">कोई सदस्य सूचीबद्ध नहीं है</p>
+          )}
         </Row>
 
         {/* Another Section with an Image */}
@@ -86,7 +88,7 @@ function About() {
         <Card className="p-4 shadow my-4 border-0 text-center">
           <h4 className="fw-bold" style={{ color: "#8B0000" }}>💰 दान करने के लिए</h4>
           <p className="fs-5">आप माता की सेवा में सहयोग कर सकते हैं। कृपया नीचे दिए गए बटन पर क्लिक करें।</p>
-          <Button variant="danger" size="lg" >
+          <Button variant="danger" size="lg">
             <FaDonate /> दान करें (Donate Now)
           </Button>
         </Card>

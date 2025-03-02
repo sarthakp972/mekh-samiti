@@ -1,8 +1,31 @@
-
+import { useState, useEffect } from "react";
+import { database, ref, get } from "../firebaseConfig";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function DonationPage() {
+  const [bankDetails, setBankDetails] = useState(null);
+
+  // Function to fetch bank details from Firebase
+  const fetchBankDetails = async () => {
+    try {
+      const snapshot = await get(ref(database, "samiti_bank_details"));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const firstEntry = Object.values(data)[0]; // Assuming single/multiple entries, taking first one
+        setBankDetails(firstEntry);
+      } else {
+        setBankDetails(null);
+      }
+    } catch (error) {
+      console.error("Error fetching bank details:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBankDetails();
+  }, []);
+
   return (
     <div
       style={{
@@ -12,18 +35,16 @@ function DonationPage() {
       }}
     >
       <Container>
-        {/* Page Title */}
         <h2
           className="text-center fw-bold mb-4"
           style={{
-            color: "#8B0000", // Dark Red
+            color: "#8B0000",
             textShadow: "2px 2px 5px rgba(0, 0, 0, 0.3)",
           }}
         >
           🙏 माँ खेरापति नव दुर्गा महोत्सव - दान पृष्ठ 🙏
         </h2>
 
-        {/* Donation Section */}
         <Row className="justify-content-center">
           <Col md={8} sm={12}>
             <Card
@@ -35,114 +56,112 @@ function DonationPage() {
               }}
             >
               <Card.Body>
-                <h4
-                  style={{
-                    color: "#8B0000",
-                    fontWeight: "bold",
-                  }}
-                >
-                  आपका सहयोग हमारी आस्था को और मजबूत करेगा!  
+                <h4 style={{ color: "#8B0000", fontWeight: "bold" }}>
+                  आपका सहयोग हमारी आस्था को और मजबूत करेगा!
                 </h4>
                 <p style={{ color: "#660000", fontSize: "18px" }}>
                   माँ खेरापति नव दुर्गा महोत्सव में दान देकर पुण्य अर्जित करें।
                   आपका योगदान समिति के धार्मिक एवं सामाजिक कार्यों में प्रयुक्त किया जाएगा।
                 </p>
 
-                {/* QR Code Image - Full Size */}
-                <div className="text-center my-4">
-                  <img
-                    src="https://res.cloudinary.com/dsoppcx77/image/upload/v1740552231/QR-code-donation_k5vuaf.jpg" // Replace with actual QR code
-                    alt="Donation QR Code"
-                    style={{
-                      width: "100%",
-                      maxWidth: "400px",
-                      height: "auto",
-                      borderRadius: "10px",
-                      border: "4px solid #8B0000",
-                    }}
-                  />
-                </div>
+                {bankDetails ? (
+                  <>
+                    {/* QR Code Image */}
+                    <div className="text-center my-4">
+                      <img
+                        src={bankDetails.qr_image}
+                        alt="Donation QR Code"
+                        style={{
+                          width: "100%",
+                          maxWidth: "400px",
+                          height: "auto",
+                          borderRadius: "10px",
+                          border: "4px solid #8B0000",
+                        }}
+                      />
+                    </div>
 
-                {/* Account Details */}
-                <div
-                  className="p-3"
-                  style={{
-                    backgroundColor: "#fff5e6", // Light cream background
-                    borderRadius: "10px",
-                    border: "2px solid #8B0000",
-                    marginBottom: "20px",
-                  }}
-                >
-                  <h5
-                    className="fw-bold"
-                    style={{ color: "#8B0000", marginBottom: "10px" }}
-                  >
-                    बैंक खाता विवरण:
-                  </h5>
-                  <p style={{ fontSize: "18px", fontWeight: "bold", color: "#660000" }}>
-                    🏦 **समिति का नाम:** माँ खेरापति नव दुर्गा महोत्सव समिति<br />
-                    👤 **खाता धारक:** महेन्द्र लोधी <br />
-                    🏦 **बैंक का नाम:**सेंट्रल बैंक ऑफ़ इंडिया <br />
-                    🔢 **खाता संख्या:** 338886630 <br />
-                    🏛 **IFSC कोड:** CBIN0281524
+                    {/* Account Details */}
+                    <div
+                      className="p-3"
+                      style={{
+                        backgroundColor: "#fff5e6",
+                        borderRadius: "10px",
+                        border: "2px solid #8B0000",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      <h5 className="fw-bold" style={{ color: "#8B0000" }}>
+                        बैंक खाता विवरण:
+                      </h5>
+                      <p style={{ fontSize: "18px", fontWeight: "bold", color: "#660000" }}>
+                        🏦 <b>समिति का नाम:</b> {bankDetails.samiti_name} <br />
+                        👤 <b>खाता धारक:</b> {bankDetails.account_holder_name} <br />
+                        🏦 <b>बैंक का नाम:</b> {bankDetails.bank_name} <br />
+                        🔢 <b>खाता संख्या:</b> {bankDetails.account_number} <br />
+                        🏛 <b>IFSC कोड:</b> {bankDetails.ifsc_code}
+                      </p>
+                    </div>
+
+                    {/* UPI ID */}
+                    <div
+                      className="p-2"
+                      style={{
+                        backgroundColor: "#ffcccc",
+                        borderRadius: "10px",
+                        border: "2px solid #8B0000",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      <h5 className="fw-bold" style={{ color: "#8B0000" }}>
+                        UPI आईडी:
+                      </h5>
+                      <p
+                        className="fw-bold"
+                        style={{
+                          fontSize: "20px",
+                          color: "#660000",
+                          backgroundColor: "#fff",
+                          display: "inline-block",
+                          padding: "10px 20px",
+                          borderRadius: "10px",
+                          border: "2px dashed #8B0000",
+                        }}
+                      >
+                        {bankDetails.upi_id}
+                      </p>
+                    </div>
+
+                    {/* Donation Button */}
+                    <Button
+                      variant="danger"
+                      className="mt-3 fw-bold"
+                      style={{
+                        backgroundColor: "#8B0000",
+                        border: "none",
+                        fontSize: "18px",
+                      }}
+                    >
+                      अब दान करें 🚀
+                    </Button>
+
+                    {/* Contact Information */}
+                    <div className="mt-4">
+                      <h5 className="fw-bold" style={{ color: "#8B0000" }}>
+                        किसी भी जानकारी के लिए संपर्क करें:
+                      </h5>
+                      <p style={{ fontSize: "18px", fontWeight: "bold", color: "#660000" }}>
+                        📞 {bankDetails.contact_number} <br />
+                        📞 {bankDetails.contact_number2} <br />
+                        📞 {bankDetails.contact_number3}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <p style={{ color: "#8B0000", fontWeight: "bold" }}>
+                    बैंक विवरण लोड हो रहे हैं...
                   </p>
-                </div>
-
-                {/* UPI ID */}
-                <div
-                  className="p-2"
-                  style={{
-                    backgroundColor: "#ffcccc",
-                    borderRadius: "10px",
-                    border: "2px solid #8B0000",
-                    marginBottom: "20px",
-                  }}
-                >
-                  <h5
-                    className="fw-bold"
-                    style={{ color: "#8B0000", marginBottom: "10px" }}
-                  >
-                    UPI आईडी:
-                  </h5>
-                  <p
-                    className="fw-bold"
-                    style={{
-                      fontSize: "20px",
-                      color: "#660000",
-                      backgroundColor: "#fff",
-                      display: "inline-block",
-                      padding: "10px 20px",
-                      borderRadius: "10px",
-                      border: "2px dashed #8B0000",
-                    }}
-                  >
-                    2333@ybl
-                  </p>
-                </div>
-
-                {/* Donation Button */}
-                <Button
-                  variant="danger"
-                  className="mt-3 fw-bold"
-                  style={{
-                    backgroundColor: "#8B0000",
-                    border: "none",
-                    fontSize: "18px",
-                  }}
-                >
-                  अब दान करें 🚀
-                </Button>
-
-                {/* Contact Information */}
-                <div className="mt-4">
-                  <h5 className="fw-bold" style={{ color: "#8B0000" }}>
-                    किसी भी जानकारी के लिए संपर्क करें:
-                  </h5>
-                  <p style={{ fontSize: "18px", fontWeight: "bold", color: "#660000" }}>
-                    📞 +91 98765 43210 <br />
-                    📞 +91 91234 56789
-                  </p>
-                </div>
+                )}
               </Card.Body>
             </Card>
           </Col>
@@ -154,7 +173,7 @@ function DonationPage() {
             <Card
               className="shadow p-4"
               style={{
-                background: "#ffe6e6", // Light Pinkish Red
+                background: "#ffe6e6",
                 border: "4px solid #8B0000",
                 borderRadius: "15px",
               }}

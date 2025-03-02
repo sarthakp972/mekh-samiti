@@ -1,8 +1,32 @@
-// import React from "react";
+import { useState, useEffect } from "react";
 import { Container, Accordion } from "react-bootstrap";
+import { database, ref, get } from "../firebaseConfig"; // Import Firebase functions
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function Aarti() {
+  const [aartiList, setAartiList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch Aarti data from Firebase
+  useEffect(() => {
+    const fetchAarti = async () => {
+      try {
+        const snapshot = await get(ref(database, "Aarti"));
+        if (snapshot.exists()) {
+          setAartiList(snapshot.val());
+        } else {
+          console.warn("No Aarti data found.");
+          setAartiList([]);
+        }
+      } catch (error) {
+        console.error("Error fetching Aarti data:", error);
+      }
+      setLoading(false);
+    };
+
+    fetchAarti();
+  }, []);
+
   return (
     <div
       style={{
@@ -20,83 +44,28 @@ function Aarti() {
             textShadow: "2px 2px 5px rgba(0, 0, 0, 0.3)",
           }}
         >
-          🙏 माँ की आरतियाँ 🙏
+          🙏 आरतियाँ 🙏
         </h2>
 
-        {/* Accordion for Aarti */}
-        <Accordion defaultActiveKey="0">
-          {/* Aarti 1 - Jai Ambe Gauri */}
-          <Accordion.Item eventKey="0">
-            <Accordion.Header>
-              🌺 जय अम्बे गौरी - माँ दुर्गा की आरती 🌺
-            </Accordion.Header>
-            <Accordion.Body>
-              <p>
-                जय अम्बे गौरी, मैया जय श्यामा गौरी। <br />
-                तुमको निशदिन ध्यावत, हरि ब्रह्मा शिवरी॥ <br />
-                अम्बे गौरी, जय अम्बे गौरी॥
-              </p>
-              <p>
-                माई रे मैं तो छूटा घर से आई, <br />
-                माता तेरे चरणों की दासी, <br />
-                तेरी शरण में आई।।
-              </p>
-            </Accordion.Body>
-          </Accordion.Item>
-
-          {/* Aarti 2 - Om Jai Jagdish Hare */}
-          <Accordion.Item eventKey="1">
-            <Accordion.Header>
-              🌿 ॐ जय जगदीश हरे - भगवान की आरती 🌿
-            </Accordion.Header>
-            <Accordion.Body>
-              <p>
-                ॐ जय जगदीश हरे, स्वामी जय जगदीश हरे। <br />
-                भक्त जनों के संकट, दास जनों के संकट, क्षण में दूर करे॥
-              </p>
-              <p>
-                जो ध्यावे फल पावे, दुःख विनसे मन का। <br />
-                स्वामी दुःख विनसे मन का, सुख संपत्ति घर आवे॥
-              </p>
-            </Accordion.Body>
-          </Accordion.Item>
-
-          {/* Aarti 3 - Durga Chalisa */}
-          <Accordion.Item eventKey="2">
-            <Accordion.Header>
-              🔥 दुर्गा चालीसा - माँ दुर्गा स्तुति 🔥
-            </Accordion.Header>
-            <Accordion.Body>
-              <p>
-                नमन करूँ माता तुझको बारम्बार, <br />
-                विनती करूँ मैं चरणों में अपार॥ <br />
-                दुर्गा चालीसा पढ़ जो कोई, <br />
-                संकट दूर करे भव मोही॥
-              </p>
-              <p>
-                जय जय माँ जगदम्बे, जय जय दुर्गे माता। <br />
-                संकट हरनी, सुख करनी, अम्बे माँ वरदाता॥
-              </p>
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-
-        {/* Contact Information */}
-        <div className="text-center mt-5">
-          <h5 className="fw-bold" style={{ color: "#8B0000" }}>
-            किसी भी जानकारी के लिए संपर्क करें:
-          </h5>
-          <p
-            style={{
-              fontSize: "18px",
-              fontWeight: "bold",
-              color: "#660000",
-            }}
-          >
-            📞 +91 98765 43210 <br />
-            📞 +91 91234 56789
-          </p>
-        </div>
+        {/* Aarti Accordion */}
+        {loading ? (
+          <p className="text-center">🚀 आरती डेटा लोड हो रहा है...</p>
+        ) : (
+          <Accordion defaultActiveKey="0">
+            {aartiList.length > 0 ? (
+              aartiList.map((aarti, index) => (
+                <Accordion.Item eventKey={index.toString()} key={index}>
+                  <Accordion.Header>🌺 {aarti.title} 🌺</Accordion.Header>
+                  <Accordion.Body>
+                    <p>{aarti.description}</p>
+                  </Accordion.Body>
+                </Accordion.Item>
+              ))
+            ) : (
+              <p className="text-center">⚠️ कोई आरती डेटा उपलब्ध नहीं है।</p>
+            )}
+          </Accordion>
+        )}
       </Container>
     </div>
   );

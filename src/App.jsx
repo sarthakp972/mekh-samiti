@@ -12,10 +12,12 @@ import Contact from "./Pages/Contact";
 import NoticePage from "./Pages/NoticePage";
 import Home from "./Pages/Home";
 import Gallery from "./Pages/Gallery";
+import ScrollToTop from "./Components/ScrollToTop";
 
 function App() {
   return (
     <Router>
+       <ScrollToTop />
       <AnnouncementBar />
       <MataJiNavbar />
       
